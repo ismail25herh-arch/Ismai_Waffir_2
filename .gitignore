@@ -1,0 +1,25 @@
+﻿# Laravel
+backend/vendor/
+backend/.env
+backend/.env.backup
+backend/.phpunit.result.cache
+
+# Laravel runtime
+backend/storage/logs/
+backend/storage/framework/cache/
+backend/storage/framework/sessions/
+backend/storage/framework/views/
+
+# Flutter / Dart
+flutter_app/.dart_tool/
+flutter_app/build/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins-dependencies
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
