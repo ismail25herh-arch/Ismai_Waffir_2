@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
 {
@@ -42,26 +43,48 @@ class AuthService
         return [$user, $this->issueTokens($user)];
     }
 
-    public function passwordLogin($email, $password)
+    public function passwordLogin($identifier, $password)
     {
-        $user = User::where('email', $email)->orWhere('phone_number', $email)->first();
+        $user = User::where('email', $identifier)->orWhere('phone_number', $identifier)->first();
         if (!$user || !$user->is_active || !Hash::check($password, $user->password)) {
-            throw ValidationException::withMessages(['email' => ['بيانات الدخول غير صحيحة.']]);
+            throw ValidationException::withMessages(['phone' => ['بيانات الدخول غير صحيحة.']]);
         }
         return [$user, $this->issueTokens($user)];
     }
 
     public function issueTokens(User $user)
     {
-        $access = $user->createToken('flutter-access', ['access']);
-        $refresh = $user->createToken('flutter-refresh', ['refresh']);
-        $minutes = (int) config('sanctum.expiration', 43200);
-        return ['access_token' => $access->plainTextToken, 'refresh_token' => $refresh->plainTextToken,
-            'token_type' => 'Bearer', 'expires_in' => $minutes * 60];
+        JWTAuth::factory()->setTTL((int) config('jwt.ttl', 60));
+        $access = JWTAuth::customClaims(['token_type' => 'access'])->fromUser($user);
+        JWTAuth::factory()->setTTL((int) config('jwt.refresh_ttl', 20160));
+        $refresh = JWTAuth::customClaims(['token_type' => 'refresh'])->fromUser($user);
+
+        return [
+            'access_token' => $access,
+            'refresh_token' => $refresh,
+            'token_type' => 'Bearer',
+            'expires_in' => (int) config('jwt.ttl', 60) * 60,
+        ];
     }
 
-    public function revokeCurrent(User $user)
+    public function revokeToken($token)
     {
-        if ($user->currentAccessToken()) $user->currentAccessToken()->delete();
+        JWTAuth::setToken($token)->invalidate();
+    }
+
+    public function refresh($refreshToken)
+    {
+        $payload = JWTAuth::setToken($refreshToken)->getPayload();
+        if ($payload->get('token_type') !== 'refresh') {
+            throw ValidationException::withMessages(['refresh_token' => ['رمز التحديث غير صالح.']]);
+        }
+
+        $user = User::find($payload->get('sub'));
+        if (!$user || !$user->is_active) {
+            throw ValidationException::withMessages(['refresh_token' => ['جلسة المستخدم غير صالحة.']]);
+        }
+
+        JWTAuth::setToken($refreshToken)->invalidate();
+        return $this->issueTokens($user);
     }
 }
