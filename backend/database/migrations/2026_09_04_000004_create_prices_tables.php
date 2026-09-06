@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePricesTables extends Migration
 {
+
+public $withinTransaction = false;
+
     public function up()
     {
         Schema::create('official_prices', function (Blueprint $table) {

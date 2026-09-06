@@ -44,4 +44,18 @@ php artisan serve
 php artisan test
 ```
 
+## النشر على Render
+
+ملف `render.yaml` في جذر المستودع ينشئ خدمة الويب وقاعدة PostgreSQL تلقائياً.
+بعد دفع المستودع إلى GitHub:
+
+1. في Render اختر **New > Blueprint** واربط مستودع GitHub.
+2. اختر المستودع الذي يحتوي على `render.yaml` واضغط **Apply**.
+3. انتظر بناء Docker وتشغيل الترحيلات تلقائياً.
+
+الخدمة تستخدم `backend/Dockerfile`. يتم حقن `APP_KEY` و`JWT_SECRET` تلقائياً،
+وتأتي `DATABASE_URL` من قاعدة PostgreSQL التي ينشئها Render. لا تضع أي أسرار في
+GitHub. إذا غُيّر اسم الخدمة، حدّث `APP_URL` في `render.yaml` إلى رابط Render
+الجديد.
+
 للاختبارات استخدم SQLite في الذاكرة كما هو مضبوط في `phpunit.xml`.

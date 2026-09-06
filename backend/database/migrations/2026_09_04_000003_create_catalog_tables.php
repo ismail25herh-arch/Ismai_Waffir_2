@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateCatalogTables extends Migration
 {
+
+public $withinTransaction = false;
+
     public function up()
     {
         Schema::create('brands', function (Blueprint $table) {

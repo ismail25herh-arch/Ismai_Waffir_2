@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 class RepairFlutterContract extends Migration
 {
+public $withinTransaction = false;
+
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {

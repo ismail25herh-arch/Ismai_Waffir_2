@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateReportsAndOtpsTables extends Migration
 {
+
+public $withinTransaction = false;
+
     public function up()
     {
         Schema::create('reports', function (Blueprint $table) {
